@@ -45,6 +45,12 @@
       "ConstraintDescription" : "must be either true or false."
     },
 
+    "KeyName": {
+      "Description": "Name of an existing EC2 KeyPair to enable SSH access to the instances",
+      "Type": "AWS::EC2::KeyPair::KeyName",
+      "ConstraintDescription": "must be the name of an existing EC2 KeyPair."
+    },
+
     "InstanceType" : {
       "Description" : "Wordpress Server EC2 instance type",
       "Type" : "String",
@@ -132,7 +138,6 @@
 			"Properties" : {
         "Parameters": {
           "DBUser": {"Ref": "DBUser"},
-          "DBPassword": "{{resolve:ssm-secure:/CloudFormation/Wordpress/DBPassword:1}}",
           "DBSecurityGroups": [{"Ref": "DBSecurityGroup"}],
           "DBSubnetGroupName": {"Ref": "DBSubnetGroup"},
           "MultiAZDatabase": {"Ref": "MultiAZDatabase"}
