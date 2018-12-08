@@ -62,7 +62,7 @@
       "Type": "List<AWS::EC2::SecurityGroup::Id>"
     },
 
-    "DBSubnetGroupName": {
+    "DBSubnetGroup": {
       "Description": "The WordPress database subnet group",
       "Type": "String",
       "MinLength": "1",
