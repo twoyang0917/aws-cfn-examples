@@ -1,0 +1,102 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+
+  "Description" : "AWS CloudFormation Sample Template Wordpress: WordPress is web software you can use to create a beautiful website or blog. This template install an Amazon RDS database instance for the storage of Wordpress.",
+
+  "Parameters" : {
+
+    "DBClass" : {
+      "Description" : "Database instance class",
+      "Type" : "String",
+      "Default" : "db.m1.large",
+      "AllowedValues" : [ "db.t1.micro", "db.m1.small", "db.m1.medium", "db.m1.large", "db.m1.xlarge", "db.m2.xlarge", "db.m2.2xlarge", "db.m2.4xlarge", "db.m3.medium", "db.m3.large", "db.m3.xlarge", "db.m3.2xlarge", "db.m4.large", "db.m4.xlarge", "db.m4.2xlarge", "db.m4.4xlarge"],
+      "ConstraintDescription" : "must select a valid database instance type."
+    },
+
+    "DBName" : {
+      "Default": "wordpress",
+      "Description" : "The WordPress database name",
+      "Type": "String",
+      "MinLength": "1",
+      "MaxLength": "64",
+      "AllowedPattern" : "[a-zA-Z][a-zA-Z0-9]*",
+      "ConstraintDescription" : "must begin with a letter and contain only alphanumeric characters."
+    },
+
+    "DBEngine" : {
+      "Default": "MYSQL",
+      "Description" : "The WordPress database engine",
+      "Type": "String",
+      "AllowedValues" : ["MYSQL"],
+      "ConstraintDescription" : "must select a valid database instance type."
+    },
+
+    "DBUser" : {
+      "NoEcho": "true",
+      "Description" : "The WordPress database admin account username",
+      "Type": "String",
+      "MinLength": "1",
+      "MaxLength": "16",
+      "AllowedPattern" : "[a-zA-Z][a-zA-Z0-9]*",
+      "ConstraintDescription" : "must begin with a letter and contain only alphanumeric characters."
+    },
+
+    "MultiAZDatabase": {
+      "Description" : "Create a Multi-AZ Amazon RDS database instance",
+      "Type": "String",
+      "AllowedValues" : [ "true", "false" ],
+      "ConstraintDescription" : "must be either true or false."
+    },
+
+    "DBAllocatedStorage" : {
+      "Default": "1",
+      "Description" : "The size of the database (Gb)",
+      "Type": "Number",
+      "MinValue": "1",
+      "MaxValue": "10",
+      "ConstraintDescription" : "must be between 1 and 10Gb."
+    },
+
+    "DBSecurityGroups": {
+      "Description": "The WordPress database security group",
+      "Type": "List<AWS::EC2::SecurityGroup::Id>"
+    },
+
+    "DBSubnetGroupName": {
+      "Description": "The WordPress database subnet group",
+      "Type": "String",
+      "MinLength": "1",
+      "MaxLength": "32"
+    }
+  },
+
+  "Resources" : {
+    "DBInstance" : {
+      "Type": "AWS::RDS::DBInstance",
+      "Properties": {
+        "DBName"            : { "Ref" : "DBName" },
+        "Engine"            : { "Ref" : "DBEngine" },
+        "MultiAZ"           : { "Ref": "MultiAZDatabase" },
+        "MasterUsername"    : { "Ref" : "DBUser" },
+        "MasterUserPassword": { "Ref" : "DBPassword" },
+        "DBInstanceClass"   : { "Ref" : "DBClass" },
+        "AllocatedStorage"  : { "Ref" : "DBAllocatedStorage" },
+        "VPCSecurityGroups" : [{ "Ref" : "DBSecurityGroups" }],
+        "DBSubnetGroupName" : { "Ref" : "DBSubnetGroup" },
+        "DeleteAutomatedBackups" : "true"
+      }
+    }
+  },
+
+  "Outputs" : {
+    "DBEndpoint": {
+      "Description": "DBEndpoint of this wordpress application, the DNS name of RDS.",
+      "Value": { "Fn::GetAtt": [ "DBInstance", "Endpoint.Address" ]},
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-DBEndpoint"
+        }
+      }
+    }
+  }
+}

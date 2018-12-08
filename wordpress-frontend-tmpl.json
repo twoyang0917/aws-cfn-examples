@@ -1,0 +1,265 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+
+  "Description" : "AWS CloudFormation Sample Template Wordpress Server: WordPress is web software you can use to create a beautiful website or blog.",
+
+  "Parameters" : {
+    "VPCID": {
+      "Description": "The security group of ALB",
+      "Type": "AWS::EC2::VPC::Id"
+    },
+
+    "PublicSubnets": {
+      "Description": "The list of Public Subnets",
+      "Type": "List<AWS::EC2::Subnet::Id>"
+    },
+
+    "PrivateSubnets": {
+      "Description": "The list of Private Subnets",
+      "Type": "List<AWS::EC2::Subnet::Id>"
+    },
+
+    "KeyName": {
+      "Description" : "Name of an existing EC2 KeyPair to enable SSH access to the instances",
+      "Type": "AWS::EC2::KeyPair::KeyName",
+      "ConstraintDescription" : "must be the name of an existing EC2 KeyPair."
+    },
+
+    "InstanceType" : {
+      "Description" : "Wordpress Server EC2 instance type",
+      "Type" : "String",
+      "Default" : "t2.small",
+      "AllowedValues" : [ "t2.nano", "t2.micro", "t2.small", "t2.medium", "t2.large", "m4.large", "m4.xlarge", "m4.2xlarge", "m4.4xlarge", "m4.10xlarge", "c4.xlarge", "c4.2xlarge", "c4.4xlarge", "c4.8xlarge"],
+      "ConstraintDescription" : "must be a valid EC2 instance type."
+    },
+
+    "WordpressALBSecurityGroup": {
+      "Description": "The security group of ALB",
+      "Type": "AWS::EC2::SecurityGroup::Id"
+    },
+
+    "WordpressServerSecurityGroup": {
+      "Description": "The security group of ALB",
+      "Type": "AWS::EC2::SecurityGroup::Id"
+    },
+
+    "WordpressServerCapacity": {
+      "Default": "1",
+      "Description": "The initial number of WordpressServer instances",
+      "Type": "Number",
+      "MinValue": "1",
+      "MaxValue": "2",
+      "ConstraintDescription": "must be between 1 and 2 EC2 instances."
+    }
+  },
+
+  "Mappings" : {
+    "AWSRegionOS2AMI" : {
+      "us-west-1": {
+        "amazon": "ami-0c3ca2c6f4edb5546",
+        "xenial": "ami-08945b3352c7bf9c0",
+        "trusty": "ami-056411f6be4840844"
+      }
+    }
+  },
+
+  "Resources" : {
+    "ApplicationLoadBalancer": {
+      "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+      "Properties": {
+        "Subnets": { "Ref" : "PublicSubnets"},
+        "SecurityGroups": [{ "Ref" : "WordpressALBSecurityGroup"}]
+      }
+    },
+    "ALBTargetGroup": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Properties": {
+        "HealthCheckPath": "/",
+        "HealthCheckIntervalSeconds": 10,
+        "HealthCheckTimeoutSeconds": 5,
+        "HealthyThresholdCount": 2,
+        "Port": 80,
+        "Protocol": "HTTP",
+        "UnhealthyThresholdCount": 5,
+        "VpcId": { "Ref" : "VPCID"},
+        "TargetGroupAttributes": [
+          {
+            "Key": "stickiness.enabled",
+            "Value": "true"
+          },
+          {
+            "Key": "stickiness.type",
+            "Value": "lb_cookie"
+          },
+          {
+            "Key": "stickiness.lb_cookie.duration_seconds",
+            "Value": "30"
+          }
+        ]
+      }
+    },
+    "ALBListener": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties": {
+        "DefaultActions": [
+          {
+            "Type": "forward",
+            "TargetGroupArn": {
+              "Ref": "ALBTargetGroup"
+            }
+          }
+        ],
+        "LoadBalancerArn": {
+          "Ref": "ApplicationLoadBalancer"
+        },
+        "Port": "80",
+        "Protocol": "HTTP"
+      }
+    },
+
+    "LaunchConfig": {
+      "Type" : "AWS::AutoScaling::LaunchConfiguration",
+      "Metadata" : {
+        "AWS::CloudFormation::Init" : {
+          "configSets" : {
+            "All" : ["install_cfn", "bootstrap" ]
+          },
+          
+          "install_cfn" : {
+            "files": {
+              "/etc/cfn/cfn-hup.conf": {
+                "content": { "Fn::Join": [ "", [
+                  "[main]\n",
+                  "stack=", { "Ref": "AWS::StackId" }, "\n",
+                  "region=", { "Ref": "AWS::Region" }, "\n"
+                ]]},
+                "mode"  : "000400",
+                "owner" : "root",
+                "group" : "root"
+              },
+              "/etc/cfn/hooks.d/cfn-auto-reloader.conf": {
+                "content": { "Fn::Join": [ "", [
+                  "[cfn-auto-reloader-hook]\n",
+                  "triggers=post.update\n",
+                  "path=Resources.LaunchConfig.Metadata.AWS::CloudFormation::Init\n",
+                  "action=/opt/aws/bin/cfn-init -v ",
+                          "         --stack ", { "Ref" : "AWS::StackName" },
+                          "         --resource LaunchConfig ",
+                          "         --configsets All ",
+                          "         --region ", { "Ref" : "AWS::Region" }, "\n"
+                ]]},
+                "mode"  : "000400",
+                "owner" : "root",
+                "group" : "root"
+              },
+              "/lib/systemd/system/cfn-hup.service": {
+                "content": {
+                  "Fn::Join": [ "", [
+                      "[Unit]\n",
+                      "Description=cfn-hup daemon\n\n",
+                      "[Service]\n",
+                      "Type=simple\n",
+                      "ExecStart=/opt/aws/bin/cfn-hup\n",
+                      "Restart=always\n\n",
+                      "[Install]\n",
+                      "WantedBy=multi-user.target"
+                    ]
+                  ]
+                },
+                "mode": "000644",
+                "owner": "root",
+                "group": "root"
+              }
+            },
+            "commands": {
+              "01_enable_cfn_hup": {
+                "command": "systemctl enable cfn-hup.service"
+              },
+              "02_start_cfn_hup": {
+                "command": "systemctl start cfn-hup.service"
+              }
+            }
+          },
+
+          "bootstrap" : {
+            "files" : {
+              "/services/.env" : {
+                "content" : { "Fn::Join" : [ "", [
+                  "WORDPRESS_DB_HOST=", { "Ref" : "DBEndpoint" }, "\n",
+                  "WORDPRESS_DB_NAME=", { "Ref" : "DBName" }, "\n",
+                  "WORDPRESS_DB_USER=", { "Ref" : "DBUser" }, "\n",
+                  "WORDPRESS_DB_PASSWORD=changeit\n"
+                ]]},
+                "mode" : "000600",
+                "owner" : "root",
+                "group" : "root"
+              }
+            },
+            "commands" : {
+              "01create_directory": {
+                "command": "mkdir /services"
+              },
+              "02clone_bootstrap_repo" : {
+                "command" : "git clone https://github.com/twoyang0917/aws-bootstrap.git",
+                "cwd" : "/services"
+              },
+              "03exe_bootstrap": {
+                "command": "bash /services/aws-bootstrap/wordpress_bootstrap.sh"
+              }
+            }
+          }
+        }
+      },
+      "Properties": {
+        "ImageId" : { "Fn::FindInMap" : [ "AWSRegionOS2AMI", { "Ref": "AWS::Region" } , "xenial"] },
+        "InstanceType"   : { "Ref" : "InstanceType" },
+        "SecurityGroups" : [ { "Ref" : "WordpressServerSecurityGroup" } ],
+        "KeyName"        : { "Ref" : "KeyName" },
+        "UserData" : { "Fn::Base64" : { "Fn::Join" : ["", [
+                       "#!/bin/bash -xe\n",
+                       "apt-get update && apt-get install -y apt-transport-https ca-certificates software-properties-common python wget curl git\n",
+                       "curl https://bootstrap.pypa.io/get-pip.py -o /tmp/get-pip.py && python /tmp/get-pip.py\n",
+                       "curl https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz -o /tmp/aws-cfn-bootstrap-latest.tar.gz\n",
+                       "mkdir -p /opt/aws/bin\n",
+                       "easy_install --script-dir /opt/aws/bin /tmp/aws-cfn-bootstrap-latest.tar.gz\n",
+
+                       "/opt/aws/bin/cfn-init -v ",
+                       "         --stack ", { "Ref" : "AWS::StackName" },
+                       "         --resource LaunchConfig ",
+                       "         --configsets All ",
+                       "         --region ", { "Ref" : "AWS::Region" }, "\n",
+
+                       "/opt/aws/bin/cfn-signal -e $? ",
+                       "         --stack ", { "Ref" : "AWS::StackName" },
+                       "         --resource WordpressServerGroup ",
+                       "         --region ", { "Ref" : "AWS::Region" }, "\n"
+        ]]}}
+      }
+    },
+
+    "WordpressServerGroup" : {
+      "Type" : "AWS::AutoScaling::AutoScalingGroup",
+      "Properties" : {
+        "VPCZoneIdentifier" : { "Ref" : "PrivateSubnets"},
+        "LaunchConfigurationName" : { "Ref" : "LaunchConfig" },
+        "MinSize" : "1",
+        "MaxSize" : "2",
+        "DesiredCapacity" : { "Ref" : "WordpressServerCapacity" },
+        "TargetGroupARNs" : [ { "Ref" : "ALBTargetGroup" } ]
+      }
+    }
+
+  },
+
+  "Outputs" : {
+    "Endpoint": {
+      "Description": "Endpoint of this wordpress application, the DNS name of ALB.",
+      "Value": { "Fn::GetAtt": [ "ApplicationLoadBalancer", "DNSName" ]},
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-ALBDNSName"
+        }
+      }
+    }
+  }
+}
