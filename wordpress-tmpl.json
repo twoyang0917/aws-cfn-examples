@@ -57,6 +57,13 @@
       "Default" : "t2.small",
       "AllowedValues" : [ "t2.nano", "t2.micro", "t2.small", "t2.medium", "t2.large", "m4.large", "m4.xlarge", "m4.2xlarge", "m4.4xlarge", "m4.10xlarge", "c4.xlarge", "c4.2xlarge", "c4.4xlarge", "c4.8xlarge"],
       "ConstraintDescription" : "must be a valid EC2 instance type."
+    },
+
+    "TemplateURLPrefix": {
+      "Description": "template s3 url prefix",
+      "Type": "String",
+      "MinLength": "1",
+      "MaxLength": "128"
     }
   },
 
@@ -149,7 +156,17 @@
           "DBSubnetGroupName": {"Ref": "DBSubnetGroup"},
           "MultiAZDatabase": {"Ref": "MultiAZDatabase"}
 				},
-				"TemplateURL" : "https://raw.githubusercontent.com/twoyang0917/aws-cfn-examples/master/wordpress-rds-tmpl.json",
+				"TemplateURL" : {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "TemplateURLPrefix"
+              },
+              "wordpress-rds-tmpl.json"
+            ]
+          ]
+        },
 				"TimeoutInMinutes" : "30"
 			}
     },
@@ -184,7 +201,15 @@
             },
           "DBEndpoint": { "Fn::GetAtt": ["WordpessRDSStack", "Outputs.DBEndpoint"] } 
 				},
-				"TemplateURL" : "https://raw.githubusercontent.com/twoyang0917/aws-cfn-examples/master/wordpress-frontend-tmpl.json",
+				"TemplateURL" : {
+          "Fn::Join": [
+            "",
+            [ 
+              {"Ref": "TemplateURLPrefix"},
+              "wordpress-frontend-tmpl.json"
+            ]
+          ]
+        },
 				"TimeoutInMinutes" : "15"
 			}
 		}
