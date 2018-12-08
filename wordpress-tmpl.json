@@ -127,9 +127,16 @@
       "Properties" : {
           "DBSubnetGroupDescription" : "Subnet Group of database",
           "DBSubnetGroupName" : "DBSubnetGroup",
-          "SubnetIds" : [
-            { "Fn::ImportValue": {"Fn::Sub": "${VPCStackName}-DatabaseSubnets"}}
-          ]
+          "SubnetIds" : {
+              "Fn::Split": [
+                ",",
+                {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${VPCStackName}-DatabaseSubnets"
+                  }
+                }
+              ]
+          }
       }
     },
 
@@ -138,7 +145,7 @@
 			"Properties" : {
         "Parameters": {
           "DBUser": {"Ref": "DBUser"},
-          "DBSecurityGroups": [{"Ref": "DBSecurityGroup"}],
+          "DBSecurityGroup": {"Ref": "DBSecurityGroup"},
           "DBSubnetGroupName": {"Ref": "DBSubnetGroup"},
           "MultiAZDatabase": {"Ref": "MultiAZDatabase"}
 				},
@@ -155,8 +162,26 @@
           "KeyName": {"Ref": "KeyName"},
           "WordpressALBSecurityGroup": {"Ref": "WordpressALBSecurityGroup"},
           "WordpressServerSecurityGroup": {"Ref": "WordpressServerSecurityGroup"},
-					"PublicSubnets": [{ "Fn::ImportValue": {"Fn::Sub": "${VPCStackName}-PublicSubnets"}}],
-          "PrivateSubnets": [{ "Fn::ImportValue": {"Fn::Sub": "${VPCStackName}-PrivateSubnets"}}],
+					"PublicSubnets": {
+              "Fn::Split": [
+                ",",
+                {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${VPCStackName}-PublicSubnets"
+                  }
+                }
+              ]
+            },
+          "PrivateSubnets": {
+              "Fn::Split": [
+                ",",
+                {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${VPCStackName}-PrivateSubnets"
+                  }
+                }
+              ]
+            },
           "DBEndpoint": { "Fn::GetAtt": ["WordpessRDSStack", "Outputs.DBEndpoint"] } 
 				},
 				"TemplateURL" : "https://raw.githubusercontent.com/twoyang0917/aws-cfn-examples/master/wordpress-frontend-tmpl.json",

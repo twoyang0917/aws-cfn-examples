@@ -57,9 +57,11 @@
       "ConstraintDescription" : "must be between 1 and 10Gb."
     },
 
-    "DBSecurityGroups": {
+    "DBSecurityGroup": {
       "Description": "The WordPress database security group",
-      "Type": "List<AWS::EC2::SecurityGroup::Id>"
+      "Type": "String",
+      "MinLength": "1",
+      "MaxLength": "32"
     },
 
     "DBSubnetGroup": {
@@ -81,7 +83,9 @@
         "MasterUserPassword": "{{resolve:ssm-secure:/CloudFormation/Wordpress/DBPassword:1}}",
         "DBInstanceClass"   : { "Ref" : "DBClass" },
         "AllocatedStorage"  : { "Ref" : "DBAllocatedStorage" },
-        "VPCSecurityGroups" : [{ "Ref" : "DBSecurityGroups" }],
+        "VPCSecurityGroups" : [
+          { "Ref" : "DBSecurityGroup" }
+        ],
         "DBSubnetGroupName" : { "Ref" : "DBSubnetGroup" },
         "DeleteAutomatedBackups" : "true"
       }
