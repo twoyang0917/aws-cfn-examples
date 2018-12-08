@@ -49,12 +49,12 @@
     },
 
     "DBAllocatedStorage" : {
-      "Default": "1",
+      "Default": "5",
       "Description" : "The size of the database (Gb)",
       "Type": "Number",
-      "MinValue": "1",
+      "MinValue": "5",
       "MaxValue": "10",
-      "ConstraintDescription" : "must be between 1 and 10Gb."
+      "ConstraintDescription" : "must be between 5 and 10Gb."
     },
 
     "DBSecurityGroup": {
