@@ -137,7 +137,7 @@
           "DBSubnetGroupName": {"Ref": "DBSubnetGroup"},
           "MultiAZDatabase": {"Ref": "MultiAZDatabase"}
 				},
-				"TemplateURL" : "https://s3-eu-west-1.amazonaws.com/learn-cloudformation/lab7-nested-stacks/s3-stack.json",
+				"TemplateURL" : "https://raw.githubusercontent.com/twoyang0917/aws-cfn-examples/master/wordpress-rds-tmpl.json",
 				"TimeoutInMinutes" : "30"
 			}
     },
@@ -154,7 +154,7 @@
           "PrivateSubnets": [{ "Fn::ImportValue": {"Fn::Sub": "${VPCStackName}-PrivateSubnets"}}],
           "DBEndpoint": { "Fn::GetAtt": ["WordpessRDSStack", "Outputs.DBEndpoint"] } 
 				},
-				"TemplateURL" : "https://s3-eu-west-1.amazonaws.com/learn-cloudformation/lab7-nested-stacks/ec2-stack.json",
+				"TemplateURL" : "https://raw.githubusercontent.com/twoyang0917/aws-cfn-examples/master/wordpress-frontend-tmpl.json",
 				"TimeoutInMinutes" : "15"
 			}
 		}
