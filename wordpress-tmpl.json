@@ -38,6 +38,16 @@
       "ConstraintDescription" : "must begin with a letter and contain only alphanumeric characters."
     },
 
+    "DBName": {
+      "NoEcho": "true",
+      "Description": "The WordPress database name",
+      "Type": "String",
+      "MinLength": "1",
+      "MaxLength": "16",
+      "AllowedPattern": "[a-zA-Z][a-zA-Z0-9]*",
+      "ConstraintDescription": "must begin with a letter and contain only alphanumeric characters."
+    },
+
     "MultiAZDatabase": {
       "Description" : "Create a Multi-AZ Amazon RDS database instance",
       "Type": "String",
@@ -152,6 +162,7 @@
 			"Properties" : {
         "Parameters": {
           "DBUser": {"Ref": "DBUser"},
+          "DBName": {"Ref": "DBName"},
           "DBSecurityGroup": {"Ref": "DBSecurityGroup"},
           "DBSubnetGroup": {"Ref": "DBSubnetGroup"},
           "MultiAZDatabase": {"Ref": "MultiAZDatabase"}
@@ -189,6 +200,8 @@
               "Fn::Sub": "${VPCStackName}-PrivateSubnets"
             }
           },
+          "DBUser": {"Ref": "DBUser"},
+          "DBName": {"Ref": "DBName"},
           "DBEndpoint": { "Fn::GetAtt": ["RDSStack", "Outputs.DBEndpoint"] } 
 				},
 				"TemplateURL" : {

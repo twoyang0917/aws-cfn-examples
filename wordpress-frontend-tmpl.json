@@ -14,6 +14,16 @@
       "Type": "String"
     },
 
+    "DBName": {
+      "Description": "DBName",
+      "Type": "String"
+    },
+
+    "DBUser": {
+      "Description": "DBUser",
+      "Type": "String"
+    },
+
     "PublicSubnets": {
       "Description": "The Public Subnets",
       "Type": "String"
