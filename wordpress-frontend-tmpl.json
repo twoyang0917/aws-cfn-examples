@@ -89,11 +89,7 @@
         "Subnets": {
           "Fn::Split": [
             ",",
-            {
-              "Fn::ImportValue": {
-                "Fn::Sub": "PublicSubnets"
-              }
-            }
+            { "Ref": "PublicSubnets" }
           ]
         },
         "SecurityGroups": [{ "Ref" : "WordpressALBSecurityGroup"}]
@@ -271,11 +267,7 @@
         "VPCZoneIdentifier" : {
           "Fn::Split": [
             ",",
-            {
-              "Fn::ImportValue": {
-                "Fn::Sub": "PrivateSubnets"
-              }
-            }
+            { "Ref": "PrivateSubnets" }
           ]
         },
         "LaunchConfigurationName" : { "Ref" : "LaunchConfig" },
