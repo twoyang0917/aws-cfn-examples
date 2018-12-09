@@ -190,7 +190,7 @@
           "bootstrap" : {
             "commands" : {
               "01create_directory": {
-                "command": "mkdir /services"
+                "command": "[ -d /services ] || mkdir /services"
               },
               "02clone_bootstrap_repo" : {
                 "command" : "git clone https://github.com/twoyang0917/aws-bootstrap.git",

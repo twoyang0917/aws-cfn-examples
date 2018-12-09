@@ -221,7 +221,7 @@
             },
             "commands" : {
               "01create_directory": {
-                "command": "mkdir /services"
+                "command": "[ -d /services ] || mkdir /services"
               },
               "02clone_bootstrap_repo" : {
                 "command" : "git clone https://github.com/twoyang0917/aws-bootstrap.git",
@@ -257,7 +257,13 @@
                        "         --stack ", { "Ref" : "AWS::StackName" },
                        "         --resource WordpressServerGroup ",
                        "         --region ", { "Ref" : "AWS::Region" }, "\n"
-        ]]}}
+        ]]}},
+        "Tags": [
+          {
+            "Key": "AA_SERVER_GROUP",
+            "Value": "Wordpress"
+          }
+        ]
       }
     },
 
