@@ -278,7 +278,8 @@
         "Tags": [
           {
             "Key": "AA_SERVER_GROUP",
-            "Value": "Wordpress"
+            "Value": "Wordpress",
+            "PropagateAtLaunch": "true"
           }
         ]
       }
