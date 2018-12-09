@@ -9,14 +9,25 @@
       "Type": "AWS::EC2::VPC::Id"
     },
 
+    "DBEndpoint": {
+      "Description": "DBEndpoint",
+      "Type": "String",
+      "MinLength": "1",
+      "MaxLength": "32"
+    },
+
     "PublicSubnets": {
-      "Description": "The list of Public Subnets",
-      "Type": "String"
+      "Description": "The Public Subnets",
+      "Type": "String",
+      "MinLength": "1",
+      "MaxLength": "32"
     },
 
     "PrivateSubnets": {
-      "Description": "The list of Private Subnets",
-      "Type": "String"
+      "Description": "The Private Subnets",
+      "Type": "String",
+      "MinLength": "1",
+      "MaxLength": "32"
     },
 
     "KeyName": {
