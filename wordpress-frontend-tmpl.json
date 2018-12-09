@@ -286,7 +286,7 @@
       "Value": { "Fn::GetAtt": [ "ApplicationLoadBalancer", "DNSName" ]},
       "Export": {
         "Name": {
-          "Fn::Sub": "${AWS::StackName}-ALBDNSName"
+          "Fn::Sub": "${AWS::StackName}-Endpoint"
         }
       }
     }

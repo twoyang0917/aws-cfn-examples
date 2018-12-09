@@ -221,7 +221,7 @@
   "Outputs" : {
     "Endpoint": {
       "Description": "Endpoint of this wordpress application, the DNS name of ALB.",
-      "Value": { "Fn::GetAtt": [ "FrontendStack", "Outputs.ALBDNSName" ]},
+      "Value": { "Fn::GetAtt": [ "FrontendStack", "Outputs.Endpoint" ]},
       "Export": {
         "Name": {
           "Fn::Sub": "${AWS::StackName}-Endpoint"
