@@ -257,13 +257,7 @@
                        "         --stack ", { "Ref" : "AWS::StackName" },
                        "         --resource WordpressServerGroup ",
                        "         --region ", { "Ref" : "AWS::Region" }, "\n"
-        ]]}},
-        "Tags": [
-          {
-            "Key": "AA_SERVER_GROUP",
-            "Value": "Wordpress"
-          }
-        ]
+        ]]}}
       }
     },
 
@@ -280,7 +274,13 @@
         "MinSize" : "1",
         "MaxSize" : "2",
         "DesiredCapacity" : { "Ref" : "WordpressServerCapacity" },
-        "TargetGroupARNs" : [ { "Ref" : "ALBTargetGroup" } ]
+        "TargetGroupARNs" : [ { "Ref" : "ALBTargetGroup" } ],
+        "Tags": [
+          {
+            "Key": "AA_SERVER_GROUP",
+            "Value": "Wordpress"
+          }
+        ]
       }
     }
 
