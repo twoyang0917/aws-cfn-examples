@@ -11,12 +11,12 @@
 
     "PublicSubnets": {
       "Description": "The list of Public Subnets",
-      "Type": "List<AWS::EC2::Subnet::Id>"
+      "Type": "String"
     },
 
     "PrivateSubnets": {
       "Description": "The list of Private Subnets",
-      "Type": "List<AWS::EC2::Subnet::Id>"
+      "Type": "String"
     },
 
     "KeyName": {
@@ -71,7 +71,16 @@
     "ApplicationLoadBalancer": {
       "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
       "Properties": {
-        "Subnets": { "Ref" : "PublicSubnets"},
+        "Subnets": {
+          "Fn::Split": [
+            ",",
+            {
+              "Fn::ImportValue": {
+                "Fn::Sub": "PublicSubnets"
+              }
+            }
+          ]
+        },
         "SecurityGroups": [{ "Ref" : "WordpressALBSecurityGroup"}]
       }
     },
@@ -244,7 +253,16 @@
     "WordpressServerGroup" : {
       "Type" : "AWS::AutoScaling::AutoScalingGroup",
       "Properties" : {
-        "VPCZoneIdentifier" : { "Ref" : "PrivateSubnets"},
+        "VPCZoneIdentifier" : {
+          "Fn::Split": [
+            ",",
+            {
+              "Fn::ImportValue": {
+                "Fn::Sub": "PrivateSubnets"
+              }
+            }
+          ]
+        },
         "LaunchConfigurationName" : { "Ref" : "LaunchConfig" },
         "MinSize" : "1",
         "MaxSize" : "2",

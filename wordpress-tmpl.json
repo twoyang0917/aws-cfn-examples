@@ -180,25 +180,15 @@
           "WordpressALBSecurityGroup": {"Ref": "WordpressALBSecurityGroup"},
           "WordpressServerSecurityGroup": {"Ref": "WordpressServerSecurityGroup"},
 					"PublicSubnets": {
-              "Fn::Split": [
-                ",",
-                {
-                  "Fn::ImportValue": {
-                    "Fn::Sub": "${VPCStackName}-PublicSubnets"
-                  }
-                }
-              ]
-            },
+            "Fn::ImportValue": {
+              "Fn::Sub": "${VPCStackName}-PublicSubnets"
+            }
+          },
           "PrivateSubnets": {
-              "Fn::Split": [
-                ",",
-                {
-                  "Fn::ImportValue": {
-                    "Fn::Sub": "${VPCStackName}-PrivateSubnets"
-                  }
-                }
-              ]
-            },
+            "Fn::ImportValue": {
+              "Fn::Sub": "${VPCStackName}-PrivateSubnets"
+            }
+          },
           "DBEndpoint": { "Fn::GetAtt": ["RDSStack", "Outputs.DBEndpoint"] } 
 				},
 				"TemplateURL" : {
