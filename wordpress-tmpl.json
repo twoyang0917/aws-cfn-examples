@@ -147,7 +147,7 @@
       }
     },
 
-		"WordpessRDSStack": {
+		"RDSStack": {
 			"Type" : "AWS::CloudFormation::Stack",
 			"Properties" : {
         "Parameters": {
@@ -171,7 +171,7 @@
 			}
     },
     
-    "WordpessFrontendStack": {
+    "FrontendStack": {
 			"Type" : "AWS::CloudFormation::Stack",
 			"Properties" : {
 				"Parameters" : {
@@ -199,7 +199,7 @@
                 }
               ]
             },
-          "DBEndpoint": { "Fn::GetAtt": ["WordpessRDSStack", "Outputs.DBEndpoint"] } 
+          "DBEndpoint": { "Fn::GetAtt": ["RDSStack", "Outputs.DBEndpoint"] } 
 				},
 				"TemplateURL" : {
           "Fn::Join": [
@@ -218,7 +218,7 @@
   "Outputs" : {
     "Endpoint": {
       "Description": "Endpoint of this wordpress application, the DNS name of ALB.",
-      "Value": { "Fn::GetAtt": [ "WordpessFrontendStack", "Outputs.ALBDNSName" ]},
+      "Value": { "Fn::GetAtt": [ "FrontendStack", "Outputs.ALBDNSName" ]},
       "Export": {
         "Name": {
           "Fn::Sub": "${AWS::StackName}-Endpoint"
