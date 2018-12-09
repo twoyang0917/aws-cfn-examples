@@ -18,16 +18,12 @@
 
     "PublicSubnets": {
       "Description": "The Public Subnets",
-      "Type": "String",
-      "MinLength": "1",
-      "MaxLength": "32"
+      "Type": "String"
     },
 
     "PrivateSubnets": {
       "Description": "The Private Subnets",
-      "Type": "String",
-      "MinLength": "1",
-      "MaxLength": "32"
+      "Type": "String"
     },
 
     "KeyName": {
