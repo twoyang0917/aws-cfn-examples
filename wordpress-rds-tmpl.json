@@ -80,7 +80,7 @@
         "Engine"            : { "Ref" : "DBEngine" },
         "MultiAZ"           : { "Ref": "MultiAZDatabase" },
         "MasterUsername"    : { "Ref" : "DBUser" },
-        "MasterUserPassword": "{{resolve:ssm-secure:/CloudFormation/Wordpress/DBPassword:1}}",
+        "MasterUserPassword": "{{resolve:ssm-secure:/rds/cms/password/master:1}}",
         "DBInstanceClass"   : { "Ref" : "DBClass" },
         "AllocatedStorage"  : { "Ref" : "DBAllocatedStorage" },
         "VPCSecurityGroups" : [
