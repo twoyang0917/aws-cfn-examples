@@ -28,31 +28,16 @@
       "ConstraintDescription": "must be a valid IP CIDR range of the form x.x.x.x/x."
     },
 
-    "DBUser" : {
-      "NoEcho": "true",
-      "Description" : "The WordPress database admin account username",
-      "Type": "String",
-      "MinLength": "1",
-      "MaxLength": "16",
-      "AllowedPattern" : "[a-zA-Z][a-zA-Z0-9]*",
-      "ConstraintDescription" : "must begin with a letter and contain only alphanumeric characters."
-    },
-
-    "DBName": {
-      "NoEcho": "true",
-      "Description": "The WordPress database name",
-      "Type": "String",
-      "MinLength": "1",
-      "MaxLength": "16",
-      "AllowedPattern": "[a-zA-Z][a-zA-Z0-9]*",
-      "ConstraintDescription": "must begin with a letter and contain only alphanumeric characters."
-    },
-
     "MultiAZDatabase": {
       "Description" : "Create a Multi-AZ Amazon RDS database instance",
       "Type": "String",
       "AllowedValues" : [ "true", "false" ],
       "ConstraintDescription" : "must be either true or false."
+    },
+
+    "DBSnapshotIdentifier": {
+      "Description": "The snapshot that's used to restore the DB instance",
+      "Type": "String"
     },
 
     "KeyName": {
@@ -161,8 +146,7 @@
 			"Type" : "AWS::CloudFormation::Stack",
 			"Properties" : {
         "Parameters": {
-          "DBUser": {"Ref": "DBUser"},
-          "DBName": {"Ref": "DBName"},
+          "DBSnapshotIdentifier": {"Ref": "DBSnapshotIdentifier"},
           "DBSecurityGroup": {"Ref": "DBSecurityGroup"},
           "DBSubnetGroup": {"Ref": "DBSubnetGroup"},
           "MultiAZDatabase": {"Ref": "MultiAZDatabase"}
@@ -199,10 +183,7 @@
             "Fn::ImportValue": {
               "Fn::Sub": "${VPCStackName}-PrivateSubnets"
             }
-          },
-          "DBUser": {"Ref": "DBUser"},
-          "DBName": {"Ref": "DBName"},
-          "DBEndpoint": { "Fn::GetAtt": ["RDSStack", "Outputs.DBEndpoint"] } 
+          }
 				},
 				"TemplateURL" : {
           "Fn::Join": [

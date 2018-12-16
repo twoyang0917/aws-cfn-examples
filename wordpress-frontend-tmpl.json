@@ -9,21 +9,6 @@
       "Type": "AWS::EC2::VPC::Id"
     },
 
-    "DBEndpoint": {
-      "Description": "DBEndpoint",
-      "Type": "String"
-    },
-
-    "DBName": {
-      "Description": "DBName",
-      "Type": "String"
-    },
-
-    "DBUser": {
-      "Description": "DBUser",
-      "Type": "String"
-    },
-
     "PublicSubnets": {
       "Description": "The Public Subnets",
       "Type": "String"
@@ -63,12 +48,12 @@
     },
 
     "WordpressServerCapacity": {
-      "Default": "1",
+      "Default": "2",
       "Description": "The initial number of WordpressServer instances",
       "Type": "Number",
-      "MinValue": "1",
-      "MaxValue": "2",
-      "ConstraintDescription": "must be between 1 and 2 EC2 instances."
+      "MinValue": "2",
+      "MaxValue": "3",
+      "ConstraintDescription": "must be between 2 and 3 EC2 instances."
     }
   },
 
@@ -206,19 +191,6 @@
           },
 
           "bootstrap" : {
-            "files" : {
-              "/services/.env" : {
-                "content" : { "Fn::Join" : [ "", [
-                  "WORDPRESS_DB_HOST=", { "Ref" : "DBEndpoint" }, "\n",
-                  "WORDPRESS_DB_NAME=", { "Ref" : "DBName" }, "\n",
-                  "WORDPRESS_DB_USER=", { "Ref" : "DBUser" }, "\n",
-                  "WORDPRESS_DB_PASSWORD=changeit\n"
-                ]]},
-                "mode" : "000600",
-                "owner" : "root",
-                "group" : "root"
-              }
-            },
             "commands" : {
               "01create_directory": {
                 "command": "[ -d /services ] || mkdir /services"
@@ -271,8 +243,8 @@
           ]
         },
         "LaunchConfigurationName" : { "Ref" : "LaunchConfig" },
-        "MinSize" : "1",
-        "MaxSize" : "2",
+        "MinSize" : "2",
+        "MaxSize" : "3",
         "DesiredCapacity" : { "Ref" : "WordpressServerCapacity" },
         "TargetGroupARNs" : [ { "Ref" : "ALBTargetGroup" } ],
         "Tags": [

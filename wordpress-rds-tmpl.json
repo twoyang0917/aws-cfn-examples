@@ -13,32 +13,12 @@
       "ConstraintDescription" : "must select a valid database instance type."
     },
 
-    "DBName" : {
-      "Default": "wordpress",
-      "Description" : "The WordPress database name",
-      "Type": "String",
-      "MinLength": "1",
-      "MaxLength": "64",
-      "AllowedPattern" : "[a-zA-Z][a-zA-Z0-9]*",
-      "ConstraintDescription" : "must begin with a letter and contain only alphanumeric characters."
-    },
-
     "DBEngine" : {
       "Default": "MYSQL",
       "Description" : "The WordPress database engine",
       "Type": "String",
       "AllowedValues" : ["MYSQL"],
       "ConstraintDescription" : "must select a valid database instance type."
-    },
-
-    "DBUser" : {
-      "NoEcho": "true",
-      "Description" : "The WordPress database admin account username",
-      "Type": "String",
-      "MinLength": "1",
-      "MaxLength": "16",
-      "AllowedPattern" : "[a-zA-Z][a-zA-Z0-9]*",
-      "ConstraintDescription" : "must begin with a letter and contain only alphanumeric characters."
     },
 
     "MultiAZDatabase": {
@@ -69,6 +49,11 @@
       "Type": "String",
       "MinLength": "1",
       "MaxLength": "32"
+    },
+
+    "DBSnapshotIdentifier": {
+      "Description": "The snapshot that's used to restore the DB instance",
+      "Type": "String"
     }
   },
 
@@ -76,18 +61,29 @@
     "DBInstance" : {
       "Type": "AWS::RDS::DBInstance",
       "Properties": {
-        "DBName"            : { "Ref" : "DBName" },
+        "Port": "{{resolve:ssm:/rds/wordpress/port:1}}",
+        "MasterUsername": "{{resolve:ssm:/rds/wordpress/master_username:1}}",
+        "MasterUserPassword": "{{resolve:ssm-secure:/rds/wordpress/master_password:1}}",
         "Engine"            : { "Ref" : "DBEngine" },
         "MultiAZ"           : { "Ref": "MultiAZDatabase" },
-        "MasterUsername"    : { "Ref" : "DBUser" },
-        "MasterUserPassword": "{{resolve:ssm-secure:/rds/cms/password/master:1}}",
         "DBInstanceClass"   : { "Ref" : "DBClass" },
         "AllocatedStorage"  : { "Ref" : "DBAllocatedStorage" },
         "VPCSecurityGroups" : [
           { "Ref" : "DBSecurityGroup" }
         ],
         "DBSubnetGroupName" : { "Ref" : "DBSubnetGroup" },
-        "DeleteAutomatedBackups" : "true"
+        "DeleteAutomatedBackups" : "true",
+        "DBSnapshotIdentifier" : { "Ref" : "DBSnapshotIdentifier" }
+      }
+    },
+
+    "BasicParameter": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": "/rds/wordpress/host",
+        "Type": "String",
+        "Value": { "Fn::GetAtt": [ "DBInstance", "Endpoint.Address" ]},
+        "Description": "the endpoint of wordpress rds"
       }
     }
   },
