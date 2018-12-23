@@ -1,0 +1,117 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  "Description" : "AWS CloudFormation Sample Template Wordpress: WordPress is web software you can use to create a beautiful website or blog. This template install an Amazon RDS database instance for the storage of Wordpress.",
+  "Parameters" : {
+    "VPCStackName": {
+      "Description": "Name of an active CloudFormation stack that contains the networking resources, such as the vpc and subnet that will be used in this stack.",
+      "Type": "String",
+      "MinLength": 1,
+      "MaxLength": 255,
+      "Default": "VPC"
+    },
+    "SGStackName": {
+      "Description": "Name of an active CloudFormation stack that contains the security group resources that will be used in this stack.",
+      "Type": "String",
+      "MinLength": 1,
+      "MaxLength": 255,
+      "Default": "SG"
+    },
+    "DBClass" : {
+      "Description" : "Database instance class",
+      "Type" : "String",
+      "Default" : "db.m1.large",
+      "AllowedValues" : [ "db.t1.micro", "db.m1.small", "db.m1.medium", "db.m1.large", "db.m1.xlarge", "db.m2.xlarge", "db.m2.2xlarge", "db.m2.4xlarge", "db.m3.medium", "db.m3.large", "db.m3.xlarge", "db.m3.2xlarge", "db.m4.large", "db.m4.xlarge", "db.m4.2xlarge", "db.m4.4xlarge"],
+      "ConstraintDescription" : "must select a valid database instance type."
+    },
+    "DBEngine" : {
+      "Description" : "The WordPress database engine",
+      "Type": "String",
+      "Default": "MYSQL",
+      "AllowedValues" : ["MYSQL"],
+      "ConstraintDescription" : "must select a valid database instance type."
+    },
+    "MultiAZDatabase": {
+      "Description" : "Create a Multi-AZ Amazon RDS database instance",
+      "Type": "String",
+      "Default": "false",
+      "AllowedValues" : [ "true", "false" ],
+      "ConstraintDescription" : "must be either true or false."
+    },
+    "DBAllocatedStorage" : {
+      "Description" : "The size of the database (Gb)",
+      "Type": "Number",
+      "Default": "5",
+      "MinValue": "5",
+      "MaxValue": "10",
+      "ConstraintDescription" : "must be between 5 and 10Gb."
+    },
+    "DBSnapshotIdentifier": {
+      "Description": "The snapshot that's used to restore the DB instance",
+      "Type": "String"
+    }
+  },
+
+  "Resources" : {
+    "DBSubnetGroup" : {
+      "Type" : "AWS::RDS::DBSubnetGroup",
+      "Properties" : {
+          "DBSubnetGroupDescription" : "Subnet Group of database",
+          "DBSubnetGroupName" : "DBSubnetGroup",
+          "SubnetIds" : {
+              "Fn::Split": [
+                ",",
+                {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${VPCStackName}-DatabaseSubnets"
+                  }
+                }
+              ]
+          }
+      }
+    },
+    "DBInstance" : {
+      "Type": "AWS::RDS::DBInstance",
+      "Properties": {
+        "DBName": "{{resolve:ssm:/rds/wordpress/dbname:1}}",
+        "Port": "{{resolve:ssm:/rds/wordpress/port:1}}",
+        "MasterUsername": "{{resolve:ssm:/rds/wordpress/master_username:1}}",
+        "MasterUserPassword": "{{resolve:ssm-secure:/rds/wordpress/master_password:1}}",
+        "Engine"            : { "Ref" : "DBEngine" },
+        "MultiAZ"           : { "Ref": "MultiAZDatabase" },
+        "DBInstanceClass"   : { "Ref" : "DBClass" },
+        "AllocatedStorage"  : { "Ref" : "DBAllocatedStorage" },
+        "VPCSecurityGroups" : [ 
+          {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${SGStackName}-WordpressDBSG"
+            }
+          }
+        ],
+        "DBSubnetGroupName" : { "Ref" : "DBSubnetGroup" },
+        "DeleteAutomatedBackups" : "true",
+        "DBSnapshotIdentifier" : { "Ref" : "DBSnapshotIdentifier" }
+      }
+    },
+    "BasicParameter": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": "/rds/wordpress/host",
+        "Type": "String",
+        "Value": { "Fn::GetAtt": [ "DBInstance", "Endpoint.Address" ]},
+        "Description": "the endpoint of wordpress rds"
+      }
+    }
+  },
+
+  "Outputs" : {
+    "DBHost": {
+      "Description": "Hostname of wordpress database, the DNS name of RDS.",
+      "Value": { "Fn::GetAtt": [ "DBInstance", "Endpoint.Address" ]},
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-DBHost"
+        }
+      }
+    }
+  }
+}
