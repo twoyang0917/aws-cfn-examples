@@ -44,10 +44,6 @@
       "MinValue": "5",
       "MaxValue": "10",
       "ConstraintDescription" : "must be between 5 and 10Gb."
-    },
-    "DBSnapshotIdentifier": {
-      "Description": "The snapshot that's used to restore the DB instance",
-      "Type": "String"
     }
   },
 
@@ -88,8 +84,7 @@
           }
         ],
         "DBSubnetGroupName" : { "Ref" : "DBSubnetGroup" },
-        "DeleteAutomatedBackups" : "true",
-        "DBSnapshotIdentifier" : { "Ref" : "DBSnapshotIdentifier" }
+        "DeleteAutomatedBackups" : "true"
       }
     },
     "BasicParameter": {

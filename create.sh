@@ -42,8 +42,7 @@ create_stack WordpressDB \
     --parameters \
     ParameterKey=VPCStackName,ParameterValue="Network" \
     ParameterKey=SGStackName,ParameterValue="SecurityGroup" \
-    ParameterKey=DBClass,ParameterValue="db.m1.large" \
-    ParameterKey=DBSnapshotIdentifier,ParameterValue="rds-mysql-wordpress"
+    ParameterKey=DBClass,ParameterValue="db.m1.large"
 
 create_stack Wordpress \
     --template-body file://wordpress-tmpl.json \
